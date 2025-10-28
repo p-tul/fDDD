@@ -4,23 +4,26 @@ import { Reservation } from '@/domain/reservation/reservation.entity';
 import { IReservationRepository } from '@/repositories/IReservationRepository';
 import { Result, success, failure } from '@/utils/result';
 import { CreateReservationRequest } from '@/contracts/requests/create-reservation.schema';
-import { ReservationError, ConflictingReservationError } from '@/domain/reservation/reservation.errors';
-
-// A simple restaurant capacity store for this example
-const restaurantCapacities: Record<string, number> = {};
+import { restaurantConfig } from '@/config';
+import {
+  ReservationError,
+  ConflictingReservationError,
+  ReservationNotFoundError,
+} from '@/domain/reservation/reservation.errors';
 
 @injectable()
 export class ReservationService {
   constructor(
-    @inject(IReservationRepository) 
+    @inject(IReservationRepository)
     private readonly reservationRepository: IReservationRepository
   ) {}
 
   public async createReservation(
     request: CreateReservationRequest
   ): Promise<Result<Reservation, ReservationError>> {
-    // In a real app, you'd fetch this from a Restaurant service/repository
-    const restaurantCapacity = restaurantCapacities[request.restaurantId] || 10;
+    const restaurantCapacity =
+      restaurantConfig.capacities[request.restaurantId] ||
+      restaurantConfig.capacities.default;
 
     const requestDate = new Date(request.date);
 
@@ -56,5 +59,39 @@ export class ReservationService {
     await this.reservationRepository.save(reservationResult.value);
 
     return success(reservationResult.value);
+  }
+
+  public async confirmReservation(
+    reservationId: string
+  ): Promise<Result<Reservation, ReservationNotFoundError>> {
+    const reservation =
+      await this.reservationRepository.findById(reservationId);
+
+    if (!reservation) {
+      return failure(new ReservationNotFoundError());
+    }
+
+    reservation.confirm();
+
+    await this.reservationRepository.update(reservation);
+
+    return success(reservation);
+  }
+
+  public async cancelReservation(
+    reservationId: string
+  ): Promise<Result<Reservation, ReservationNotFoundError>> {
+    const reservation =
+      await this.reservationRepository.findById(reservationId);
+
+    if (!reservation) {
+      return failure(new ReservationNotFoundError());
+    }
+
+    reservation.cancel();
+
+    await this.reservationRepository.update(reservation);
+
+    return success(reservation);
   }
 }

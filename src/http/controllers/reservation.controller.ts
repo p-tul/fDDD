@@ -24,7 +24,7 @@ export class ReservationController {
           return res.status(409).json({ message: error.message });
         }
         if (error.name === 'PastDateError') {
-            return res.status(400).json({ message: error.message });
+          return res.status(400).json({ message: error.message });
         }
         return res.status(400).json({ message: 'An unknown error occurred.' });
       }
@@ -33,6 +33,38 @@ export class ReservationController {
         return res.status(400).json({ errors: error.errors });
       }
       // Generic error for unexpected issues
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  public async confirm(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const reservationService = container.resolve(ReservationService);
+      const result = await reservationService.confirmReservation(id);
+
+      if (result.success) {
+        return res.status(200).json(result.value.props);
+      }
+
+      return res.status(404).json({ message: result.error.message });
+    } catch {
+      return res.status(500).json({ message: 'Internal Server Error' });
+    }
+  }
+
+  public async cancel(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+      const reservationService = container.resolve(ReservationService);
+      const result = await reservationService.cancelReservation(id);
+
+      if (result.success) {
+        return res.status(200).json(result.value.props);
+      }
+
+      return res.status(404).json({ message: result.error.message });
+    } catch {
       return res.status(500).json({ message: 'Internal Server Error' });
     }
   }

@@ -13,13 +13,21 @@ export class ConflictingReservationError extends Error {
 }
 
 export class PastDateError extends Error {
-    constructor() {
-      super('Cannot make a reservation in the past.');
-      this.name = 'PastDateError';
-    }
+  constructor() {
+    super('Cannot make a reservation in the past.');
+    this.name = 'PastDateError';
   }
+}
 
-export type ReservationError = 
-  | RestaurantCapacityExceededError 
+export class ReservationNotFoundError extends Error {
+  constructor() {
+    super('Reservation not found.');
+    this.name = 'ReservationNotFoundError';
+  }
+}
+
+export type ReservationError =
+  | RestaurantCapacityExceededError
   | ConflictingReservationError
-  | PastDateError;
+  | PastDateError
+  | ReservationNotFoundError;

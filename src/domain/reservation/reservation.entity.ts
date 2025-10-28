@@ -20,9 +20,8 @@ export class Reservation {
     date: Date;
     partySize: number;
   }): Result<Reservation, ReservationError> {
-
     if (params.date < new Date()) {
-        return failure(new PastDateError());
+      return failure(new PastDateError());
     }
 
     const props: ReservationProps = {

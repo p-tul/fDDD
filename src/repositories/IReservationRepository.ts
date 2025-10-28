@@ -4,6 +4,7 @@ export interface IReservationRepository {
   save(reservation: Reservation): Promise<void>;
   findByDate(restaurantId: string, date: Date): Promise<Reservation[]>;
   findById(id: string): Promise<Reservation | null>;
+  update(reservation: Reservation): Promise<void>;
 }
 
 // We use a token for dependency injection

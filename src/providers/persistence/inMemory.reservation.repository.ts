@@ -24,4 +24,10 @@ export class InMemoryReservationRepository implements IReservationRepository {
   async findById(id: string): Promise<Reservation | null> {
     return this.reservations.get(id) || null;
   }
+
+  async update(reservation: Reservation): Promise<void> {
+    // In a real DB, this would be an UPDATE query.
+    // Here, we just overwrite the existing entry.
+    this.reservations.set(reservation.props.id, reservation);
+  }
 }
